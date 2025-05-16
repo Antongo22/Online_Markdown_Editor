@@ -21,7 +21,7 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: 8542
         script: |
-          cd ~/Desktop/library
+          cd ~/Desktop/Online_Markdown_Editor
           git pull
           docker-compose down
           docker-compose up --build -d
