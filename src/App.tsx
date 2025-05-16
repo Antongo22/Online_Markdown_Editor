@@ -232,20 +232,8 @@ function App() {
     <div className={`app dark-theme ${isMobile ? 'mobile-layout' : ''}`}>
       <header className="app-header">
         <div className="header-top">
-          {useMobileMenu ? (
-          <div className="mobile-menu-wrapper">
-            <button 
-              className="mobile-menu-button" 
-              onClick={toggleMobileMenu}
-              aria-label="Меню"
-            >
-              <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-            </button>
-          </div>
-          ) : (
-            <h1>{APP_TITLE}</h1>
-          )}
-          {isMobile && (
+          <h1>{APP_TITLE}</h1>
+          {useMobileMenu && (
             <button 
               className="mobile-menu-button" 
               onClick={toggleMobileMenu}
