@@ -89,8 +89,8 @@ function App() {
       const isMobileCheck = isMobileDevice() || window.innerWidth < 500;
       setIsMobile(isMobileCheck);
       
-      // Мобильное меню для экранов до 2000px
-      const shouldUseMobileMenu = window.innerWidth < 2000;
+      // Мобильное меню для экранов меньше 1500px
+      const shouldUseMobileMenu = window.innerWidth < 1500;
       setUseMobileMenu(shouldUseMobileMenu);
     };
     
@@ -217,6 +217,55 @@ function App() {
     }
   };
   
+  // Загрузка MD файла
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (text) {
+        setContent(text);
+        // Обновляем историю
+        const newHistory = [...history.slice(0, historyIndex + 1), text];
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Сбрасываем значение инпута, чтобы можно было загрузить тот же файл повторно
+    event.target.value = '';
+    setIsMobileMenuOpen(false);
+  };
+  
+  // Сохранение в MD файл
+  const handleSaveAsMd = () => {
+    if (!content) {
+      alert('Нет содержимого для сохранения');
+      return;
+    }
+    
+    // Создаем Blob из содержимого
+    const blob = new Blob([content], { type: 'text/markdown' });
+    
+    // Создаем URL и ссылку для загрузки
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'document.md';
+    
+    // Добавляем ссылку на страницу, кликаем по ней и удаляем
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Освобождаем URL
+    URL.revokeObjectURL(url);
+    setIsMobileMenuOpen(false);
+  };
+  
   // Переключение между редактором и предпросмотром на мобильных устройствах
   const toggleMobileView = () => {
     setMobileView(view => view === 'editor' ? 'preview' : 'editor');
@@ -293,8 +342,25 @@ function App() {
             </div>
             
             <div className="mobile-menu-section">
-              <h3>Дополнительные действия</h3>
+              <h3>Файлы и действия</h3>
               <div className="mobile-menu-buttons">
+                <label 
+                  className="mobile-menu-button"
+                >
+                  <i className="fas fa-file-upload"></i> Загрузить MD
+                  <input 
+                    type="file" 
+                    accept=".md, .markdown, .txt"
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                  />
+                </label>
+                <button 
+                  className="mobile-menu-button"
+                  onClick={handleSaveAsMd}
+                >
+                  <i className="fas fa-file-download"></i> Сохранить MD
+                </button>
                 <button 
                   className="mobile-menu-button danger-button"
                   onClick={handleClearAll}
@@ -306,31 +372,58 @@ function App() {
           </div>
         ) : (
           <div className="desktop-toolbar-container">
-            <Toolbar onAction={handleToolbarAction} mobile={false} />
-            <div className="edit-actions">
-              <button 
-                className="edit-action-button" 
-                onClick={handleUndo} 
-                title="Отменить"
-                disabled={historyIndex <= 0}
-              >
-                <i className="fas fa-undo"></i>
-              </button>
-              <button 
-                className="edit-action-button" 
-                onClick={handleRedo} 
-                title="Вернуть"
-                disabled={historyIndex >= history.length - 1}
-              >
-                <i className="fas fa-redo"></i>
-              </button>
-              <button 
-                className="edit-action-button danger-button" 
-                onClick={handleClearAll} 
-                title="Очистить всё"
-              >
-                <i className="fas fa-trash"></i>
-              </button>
+            <div className="full-width-toolbar">
+              <div className="toolbar-section undo-redo-section">
+                <button 
+                  className="edit-action-button" 
+                  onClick={handleUndo} 
+                  disabled={historyIndex <= 0}
+                  title="Отменить"
+                >
+                  <i className="fas fa-undo"></i>
+                </button>
+                <button 
+                  className="edit-action-button" 
+                  onClick={handleRedo} 
+                  disabled={historyIndex >= history.length - 1}
+                  title="Вернуть"
+                >
+                  <i className="fas fa-redo"></i>
+                </button>
+              </div>
+              
+              <div className="toolbar-section">
+                <Toolbar onAction={handleToolbarAction} />
+              </div>
+              
+              <div className="toolbar-section file-actions-section">
+                <label 
+                  className="edit-action-button file-upload-button"
+                  title="Загрузить MD"
+                >
+                  <i className="fas fa-file-upload"></i>
+                  <input 
+                    type="file" 
+                    accept=".md, .markdown, .txt"
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                  />
+                </label>
+                <button 
+                  className="edit-action-button" 
+                  onClick={handleSaveAsMd} 
+                  title="Сохранить как MD"
+                >
+                  <i className="fas fa-file-download"></i>
+                </button>
+                <button 
+                  className="edit-action-button danger-button" 
+                  onClick={handleClearAll} 
+                  title="Очистить всё"
+                >
+                  <i className="fas fa-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -203,7 +203,7 @@ body, html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap: 20px;
+  gap: 10px;
 }
 
 .mobile-layout .app-header h1 {
@@ -741,11 +741,29 @@ body, html {
   align-items: center;
 }
 
-/* Кнопки действий редактирования */
-.edit-actions {
+.full-width-toolbar {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-section {
   display: flex;
   gap: 5px;
-  margin-left: 15px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Кнопки действий редактирования */
+.toolbar {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow-x: auto;
+  flex: 1;
 }
 
 .quick-action-button {
@@ -766,7 +784,7 @@ body, html {
   transition: all 0.2s ease;
 }
 
-.edit-action-button {
+.edit-action-button, .file-upload-button {
   background-color: #3c3c3c;
   color: #e0e0e0;
   border: 1px solid #444;
@@ -777,8 +795,22 @@ body, html {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
   transition: all 0.2s ease;
+}
+
+.file-upload-button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.file-upload-button input[type="file"] {
+  position: absolute;
+  font-size: 100px;
+  opacity: 0;
+  top: 0;
+  right: 0;
+  cursor: pointer;
 }
 
 .edit-action-button:hover:not(:disabled) {
@@ -798,22 +830,30 @@ body, html {
 
 .toolbar-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-right: 1rem;
+  gap: 2px;
+  min-height: 32px;
+  align-items: center;
+  margin: 0 3px;
+  justify-content: center;
 }
 
 .toolbar button,
 .toolbar label.upload-btn {
-  padding: 6px 12px;
-  border: 1px solid #444;
-  background-color: #3c3c3c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 5px;
+  background-color: #444;
+  border: 1px solid #555;
   color: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  min-width: 28px;
+  height: 28px;
+  text-align: center;
   transition: all 0.2s ease;
-  display: inline-block;
+  margin: 0 1px;
 }
 
 .toolbar button:hover,
@@ -1255,10 +1295,20 @@ body, html {
   }
 }
 
+
+
+
+
+/* Адаптивные отступы в зависимости от ширины */
 @media (max-width: 1400px) {
   .desktop-toolbar-container {
     flex-direction: column;
     align-items: center;
+  }
+  
+  .full-width-toolbar {
+    flex-direction: column;
+    gap: 5px;
   }
   
   .app-header {
@@ -1267,14 +1317,76 @@ body, html {
     padding: 10px 20px;
   }
   
-  .edit-actions {
-    margin-top: 10px;
+  .toolbar-section {
     width: 100%;
     justify-content: center;
+    margin: 5px 0;
   }
   
   .toolbar {
     width: 100%;
+    gap: 2px;
+  }
+  
+  .toolbar-group {
+    justify-content: center;
+    margin: 4px 0;
+    width: 100%;
+    gap: 2px;
+  }
+  
+  .edit-action-button, .file-upload-button {
+    flex: 0 0 auto;
+    margin: 2px;
+  }
+  
+  .toolbar button,
+  .toolbar label.upload-btn {
+    padding: 4px 6px;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .toolbar {
+    gap: 1px;
+  }
+  
+  .toolbar-group {
+    gap: 1px;
+    margin: 2px 0;
+  }
+  
+  .toolbar button,
+  .toolbar label.upload-btn {
+    padding: 3px 5px;
+    min-width: 28px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .toolbar {
+    gap: 0;
+  }
+  
+  .toolbar-group {
+    gap: 1px;
+    margin: 1px 0;
+  }
+  
+  .toolbar button,
+  .toolbar label.upload-btn {
+    padding: 3px 4px;
+    min-width: 26px;
+    font-size: 0.8rem;
+    border-radius: 3px;
+  }
+  
+  .edit-action-button, .file-upload-button {
+    margin: 1px;
+    width: 28px;
+    height: 28px;
   }
 }
 

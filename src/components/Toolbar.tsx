@@ -94,23 +94,19 @@ const Toolbar = ({ onAction, mobile = false }: ToolbarProps): React.ReactElement
           </div>
         </>
       ) : (
-        // Десктопная версия панели инструментов
+        // Десктопная версия панели инструментов (только иконки) - все в одной группе
         <>
           <div className="toolbar-group">
-            <button onClick={insertHeading} title="Заголовок">Заголовок</button>
-            <button onClick={insertSubheading} title="Подзаголовок">Подзаголовок</button>
-            <button onClick={insertBold} title="Жирный"><strong>B</strong></button>
-            <button onClick={insertItalic} title="Курсив"><em>I</em></button>
-          </div>
-          <div className="toolbar-group">
-            <button onClick={insertList} title="Маркированный список">Список</button>
-            <button onClick={insertOrderedList} title="Нумерованный список">Нум. список</button>
-            <button onClick={insertCode} title="Блок кода">Код</button>
-            <button onClick={insertLink} title="Ссылка">Ссылка</button>
-            <button onClick={insertTable} title="Таблица">Таблица</button>
-          </div>
-          <div className="toolbar-group">
-            <button onClick={insertTemplate} title="Вставить шаблон" className="template-btn">Шаблон</button>
+            <button onClick={insertHeading} title="Заголовок"><i className="fas fa-heading"></i></button>
+            <button onClick={insertSubheading} title="Подзаголовок"><i className="fas fa-heading fa-xs"></i></button>
+            <button onClick={insertBold} title="Жирный"><i className="fas fa-bold"></i></button>
+            <button onClick={insertItalic} title="Курсив"><i className="fas fa-italic"></i></button>
+            <button onClick={insertList} title="Маркированный список"><i className="fas fa-list-ul"></i></button>
+            <button onClick={insertOrderedList} title="Нумерованный список"><i className="fas fa-list-ol"></i></button>
+            <button onClick={insertCode} title="Блок кода"><i className="fas fa-code"></i></button>
+            <button onClick={insertLink} title="Ссылка"><i className="fas fa-link"></i></button>
+            <button onClick={insertTable} title="Таблица"><i className="fas fa-table"></i></button>
+            <button onClick={insertTemplate} title="Вставить шаблон"><i className="fas fa-file-alt"></i></button>
           </div>
         </>
       )}
