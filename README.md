@@ -75,4 +75,4 @@ docker-compose up
 
 - Личный сайт: [aleynichenko.ru](https://aleynichenko.ru/)
 - Главный сайт: [trexon.ru](http://trexon.ru/)
-- Сайт проекта: [trexon.ru](http://md.trexon.ru)
+- Сайт проекта: [md.trexon.ru](http://md.trexon.ru)
