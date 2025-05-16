@@ -44,20 +44,54 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false }: EditorP
     };
   }, []);
 
+  // Обработчик события, когда редактор загружен
+  const handleEditorDidMount = (editor: any) => {
+    if (mobile && editor) {
+      // Добавляем обработчик двойного клика для мобильных устройств
+      editor.onMouseDown((e: any) => {
+        if (e.event.detail === 2) { // Двойной клик
+          const position = editor.getPosition();
+          const model = editor.getModel();
+          
+          if (position && model) {
+            // Получаем текущую линию и слово под курсором
+            const lineContent = model.getLineContent(position.lineNumber);
+            const word = model.getWordAtPosition(position);
+            
+            if (word) {
+              // Выделяем слово
+              editor.setSelection({
+                startLineNumber: position.lineNumber,
+                startColumn: word.startColumn,
+                endLineNumber: position.lineNumber,
+                endColumn: word.endColumn
+              });
+            }
+          }
+        }
+      });
+    }
+    
+    // Передаем редактор внешнему обработчику, если он есть
+    if (onEditorDidMount) {
+      onEditorDidMount(editor);
+    }
+  };
+  
   return (
     <div className={`editor-container ${mobile ? 'editor-container-mobile' : ''}`}>
       <MonacoEditor
-        height={mobile ? "calc(100vh - 160px)" : "calc(100vh - 220px)"}
+        height="100%"
         defaultLanguage="markdown"
         value={content}
         onChange={handleEditorChange}
-        onMount={onEditorDidMount}
+        onMount={handleEditorDidMount}
         theme="vs-dark"
         options={{
-          minimap: { enabled: mobile ? false : true },
+          minimap: { enabled: false }, // Отключаем миникарту везде
           fontSize: mobile ? 14 : 16,
           wordWrap: 'on',
-          lineNumbers: mobile ? 'off' : 'on',
+          lineNumbers: 'on', // Включаем нумерацию строк везде
           scrollBeyondLastLine: false,
           automaticLayout: true,
           selectionHighlight: true,
@@ -69,8 +103,10 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false }: EditorP
             horizontal: 'auto',
             verticalScrollbarSize: mobile ? 8 : 10,
           },
-          folding: mobile ? false : true,
-          glyphMargin: mobile ? false : true
+          folding: true, // Включаем складывание везде
+          glyphMargin: true, // Включаем поле для иконок везде
+          lineDecorationsWidth: 10, // Увеличиваем ширину поля для нумерации
+          lineNumbersMinChars: 3 // Минимальное количество символов для номеров строк
         }}
       />
     </div>

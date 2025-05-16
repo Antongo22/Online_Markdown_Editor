@@ -16,27 +16,58 @@ body {
 body, html {
   background-color: #1e1e1e;
   color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
 }
 
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #1e1e1e;
   color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 20px;
   background-color: #1e1e1e;
-  color: #fff;
-  padding: 1rem 2rem;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #444;
+  height: 55px;
+  min-height: 55px;
+  max-height: 55px;
+}
+
+.editor-container {
+  height: calc(100vh - 56px);
+  background-color: #1e1e1e;
+  border-radius: 5px 0 0 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  padding: 0;
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  border-bottom: 1px solid #333;
+  flex: 1;
+  margin-bottom: 0;
 }
 
 /* Контейнер с настройками */
@@ -165,11 +196,13 @@ body, html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  gap: 20px;
 }
 
 .mobile-layout .app-header h1 {
   font-size: 1.2rem;
   margin-bottom: 0;
+  margin-right: auto;
 }
 
 /* Мобильная кнопка меню */
@@ -177,9 +210,11 @@ body, html {
   background-color: transparent;
   border: none;
   color: #e0e0e0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 8px;
+  padding: 6px;
+  min-width: 30px;
+  margin-left: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,6 +283,17 @@ body, html {
   margin-right: 5px;
 }
 
+/* Кнопка удаления */
+.danger-button {
+  background-color: #a22 !important;
+  color: white !important;
+  border-color: #900 !important;
+}
+
+.danger-button:hover {
+  background-color: #c33 !important;
+}
+
 /* Кнопки выбора действия */
 .mobile-action-buttons {
   display: flex;
@@ -263,24 +309,85 @@ body, html {
 /* Индикатор текущего режима */
 .mobile-view-indicator {
   position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: #1e1e1e;
   color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
+  padding: 4px 10px;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 5px;
-  z-index: 100;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.8);
+  margin: 0;
+  border-top: 1px solid #444;
+  height: 40px;
+  max-height: 40px;
+}
+
+.mobile-view-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.mobile-quick-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.quick-action-button {
+  background-color: transparent;
+  border: none;
+  color: #e0e0e0;
+  padding: 5px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+}
+
+.quick-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quick-action-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Контейнер для мобильного вида */
 .mobile-content-container {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 100px);
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 60px; /* Высота шапки */
+  left: 0;
+  right: 0;
+  bottom: 40px;
+}
+
+.app {
+  min-height: 100vh;
+  max-height: 100vh;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 .toolbar-mobile {
@@ -305,13 +412,48 @@ body, html {
 .editor-container-mobile {
   padding: 0;
   border-radius: 0;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
 }
 
 /* Стили для мобильного превью */
 .preview-container-mobile {
-  padding: 10px;
-  height: calc(100vh - 160px);
+  padding: 15px 15px 55px 15px;
+  height: 100%;
   overflow-y: auto;
+  flex: 1;
+  margin: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 40px;
+}
+
+.mobile-preview-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .markdown-preview-mobile {
@@ -579,6 +721,45 @@ body, html {
   border-bottom: 1px solid #333;
 }
 
+/* Десктопный контейнер панели инструментов */
+.desktop-toolbar-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+
+/* Кнопки действий редактирования */
+.edit-actions {
+  display: flex;
+  gap: 5px;
+  margin-left: 15px;
+}
+
+.edit-action-button {
+  background-color: #3c3c3c;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.edit-action-button:hover:not(:disabled) {
+  background-color: #4c4c4c;
+}
+
+.edit-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -649,19 +830,22 @@ body, html {
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: calc(100vh - 220px); /* Увеличенная высота чтобы место под редактор было */
+  height: calc(100vh - 56px);
   position: relative;
-  margin-top: 15px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
   border-top: 1px solid #444;
   min-height: 500px;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 56px);
+  bottom: 0;
 }
 
 .editor-pane, .preview-pane {
   width: 50%; /* Начальная ширина 50% */
   height: 100%;
   overflow: auto;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 56px);
 }
 
 .editor-pane {
@@ -670,14 +854,14 @@ body, html {
 
 /* Разделитель между панелями */
 .divider {
-  width: 5px;
-  background-color: #333;
+  width: 10px;
+  background-color: #0078d7;
   cursor: col-resize;
   transition: background-color 0.2s;
 }
 
 .divider:hover, .divider:active {
-  background-color: #555;
+  background-color: #2196F3;
 }
 
 .editor-container {
@@ -694,7 +878,7 @@ body, html {
 /* Стили превью */
 .preview-container {
   background-color: #252525;
-  padding: 2rem;
+  padding: 1.2rem;
   border: none;
   border-radius: 0;
   height: 100%;
@@ -703,16 +887,18 @@ body, html {
   overflow-x: auto;
   box-shadow: none;
   color: #e0e0e0;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 56px);
   font-size: 16px;
   line-height: 1.6;
 }
 
 .preview-pane {
   overflow: auto;
-  height: calc(100vh - 220px);
+  height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
 }
 
 /* Явное задание скроллбара для предпросмотра */
@@ -1021,6 +1207,47 @@ body, html {
 }
 
 /* Адаптивные стили */
+@media (max-width: 2000px) {
+  .desktop-toolbar-container {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .edit-actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .toolbar .toolbar-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1400px) {
+  .desktop-toolbar-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .app-header {
+    height: auto;
+    min-height: 55px;
+    padding: 10px 20px;
+  }
+  
+  .edit-actions {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .toolbar {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .content-container {
     flex-direction: column;

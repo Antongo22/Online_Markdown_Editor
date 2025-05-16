@@ -67,6 +67,10 @@ function App() {
   // Основное состояние редактора
   const [content, setContent] = useState('');
   
+  // История редактирования для Undo/Redo
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  
   // Динамическая ширина панелей (только для десктопа)
   const [editorWidth, setEditorWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -75,10 +79,36 @@ function App() {
   const dividerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
-  // Проверка мобильного устройства при загрузке
+  // Состояние для адаптивного меню на экранах меньше 2000px
+  const [useMobileMenu, setUseMobileMenu] = useState(false);
+
+  // Проверка устройства и размера экрана
   useEffect(() => {
-    setIsMobile(isMobileDevice());
+    const checkDevice = () => {
+      // Настоящий мобильный режим только для узких экранов и мобильных устройств
+      const isMobileCheck = isMobileDevice() || window.innerWidth < 500;
+      setIsMobile(isMobileCheck);
+      
+      // Мобильное меню для экранов до 2000px
+      const shouldUseMobileMenu = window.innerWidth < 2000;
+      setUseMobileMenu(shouldUseMobileMenu);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
   }, []);
+  
+  // Инициализируем историю при первой загрузке содержимого
+  useEffect(() => {
+    if (content && history.length === 0) {
+      setHistory([content]);
+      setHistoryIndex(0);
+    }
+  }, [content]);
   
   // Загрузка сохраненного контента при первом рендере
   useEffect(() => {
@@ -139,7 +169,37 @@ function App() {
   
   // Обработчик изменения контента
   const handleContentChange = (newContent: string) => {
+    // Добавляем в историю только если содержимое изменилось
+    if (content !== newContent) {
+      // Создаем новую историю, удаляя все после текущего индекса
+      const newHistory = [...history.slice(0, historyIndex + 1), newContent];
+      
+      // Ограничиваем историю до 50 шагов
+      if (newHistory.length > 50) {
+        newHistory.shift();
+      }
+      
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    }
+    
     setContent(newContent);
+  };
+  
+  // Функция отмены последнего действия (Undo)
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setContent(history[historyIndex - 1]);
+    }
+  };
+  
+  // Функция возврата отмененного действия (Redo)
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setContent(history[historyIndex + 1]);
+    }
   };
   
   // Вставка шаблонного кода/текста в редактор
@@ -147,6 +207,14 @@ function App() {
     setContent((prevContent) => {
       return prevContent + templateContent;
     });
+  };
+  
+  // Очистка всего кода
+  const handleClearAll = () => {
+    if (window.confirm('Вы уверены, что хотите очистить весь текст?')) {
+      setContent('');
+      setIsMobileMenuOpen(false);
+    }
   };
   
   // Переключение между редактором и предпросмотром на мобильных устройствах
@@ -164,18 +232,31 @@ function App() {
     <div className={`app dark-theme ${isMobile ? 'mobile-layout' : ''}`}>
       <header className="app-header">
         <div className="header-top">
-          <h1>{APP_TITLE}</h1>
+          {useMobileMenu ? (
+          <div className="mobile-menu-wrapper">
+            <button 
+              className="mobile-menu-button" 
+              onClick={toggleMobileMenu}
+              aria-label="Меню"
+            >
+              <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+            </button>
+          </div>
+          ) : (
+            <h1>{APP_TITLE}</h1>
+          )}
           {isMobile && (
             <button 
               className="mobile-menu-button" 
               onClick={toggleMobileMenu}
+              aria-label="Меню"
             >
               <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
             </button>
           )}
         </div>
         
-        {isMobile ? (
+        {useMobileMenu ? (
           <div className={`mobile-action-menu ${isMobileMenuOpen ? 'open' : ''}`}>
             <div className="mobile-menu-section">
               <h3>Навигация</h3>
@@ -196,15 +277,74 @@ function App() {
             </div>
             
             <div className="mobile-menu-section">
+              <h3>Действия редактирования</h3>
+              <div className="mobile-menu-buttons">
+                <button 
+                  className="mobile-menu-button"
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                >
+                  <i className="fas fa-undo"></i> Отмена
+                </button>
+                <button 
+                  className="mobile-menu-button"
+                  onClick={handleRedo}
+                  disabled={historyIndex >= history.length - 1}
+                >
+                  <i className="fas fa-redo"></i> Вернуть
+                </button>
+              </div>
+            </div>
+            
+            <div className="mobile-menu-section">
               <h3>Вставка элементов</h3>
               <Toolbar onAction={(template) => {
                 handleToolbarAction(template);
                 setIsMobileMenuOpen(false);
               }} mobile={true} />
             </div>
+            
+            <div className="mobile-menu-section">
+              <h3>Дополнительные действия</h3>
+              <div className="mobile-menu-buttons">
+                <button 
+                  className="mobile-menu-button danger-button"
+                  onClick={handleClearAll}
+                >
+                  <i className="fas fa-trash"></i> Очистить всё
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
-          <Toolbar onAction={handleToolbarAction} mobile={false} />
+          <div className="desktop-toolbar-container">
+            <Toolbar onAction={handleToolbarAction} mobile={false} />
+            <div className="edit-actions">
+              <button 
+                className="edit-action-button" 
+                onClick={handleUndo} 
+                title="Отменить"
+                disabled={historyIndex <= 0}
+              >
+                <i className="fas fa-undo"></i>
+              </button>
+              <button 
+                className="edit-action-button" 
+                onClick={handleRedo} 
+                title="Вернуть"
+                disabled={historyIndex >= history.length - 1}
+              >
+                <i className="fas fa-redo"></i>
+              </button>
+              <button 
+                className="edit-action-button danger-button" 
+                onClick={handleClearAll} 
+                title="Очистить всё"
+              >
+                <i className="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
         )}
       </header>
       
@@ -230,17 +370,38 @@ function App() {
           )}
           
           {/* Индикатор текущего режима и кнопка быстрого переключения */}
-          <div className="mobile-view-indicator" onClick={toggleMobileView}>
-            {mobileView === 'editor' ? (
-              <>
-                <i className="fas fa-code"></i> Редактор
-              </>
-            ) : (
-              <>
-                <i className="fas fa-eye"></i> Предпросмотр
-              </>  
-            )}
-            <i className="fas fa-exchange-alt"></i>
+          <div className="mobile-view-indicator">
+            <div className="mobile-view-label" onClick={toggleMobileView}>
+              {mobileView === 'editor' ? (
+                <>
+                  <i className="fas fa-code"></i> Редактор
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-eye"></i> Предпросмотр
+                </>  
+              )}
+              <i className="fas fa-exchange-alt"></i>
+            </div>
+            
+            <div className="mobile-quick-actions">
+              <button 
+                className="quick-action-button" 
+                onClick={handleUndo} 
+                disabled={historyIndex <= 0}
+                title="Отменить"
+              >
+                <i className="fas fa-undo"></i>
+              </button>
+              <button 
+                className="quick-action-button" 
+                onClick={handleRedo} 
+                disabled={historyIndex >= history.length - 1}
+                title="Вернуть"
+              >
+                <i className="fas fa-redo"></i>
+              </button>
+            </div>
           </div>
         </div>
       ) : (
