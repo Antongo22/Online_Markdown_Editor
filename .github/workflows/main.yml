@@ -1,0 +1,61 @@
+name: Deploy to server with Telegram notifications
+
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: SSH and deploy
+      uses: appleboy/ssh-action@v1.0.0
+      id: deploy
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: 8542
+        script: |
+          cd ~/Desktop/library
+          git pull
+          docker-compose down
+          docker-compose up --build -d
+
+    - name: Send Telegram notification (Success)
+      if: success()
+      uses: appleboy/telegram-action@v1.0.0
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          ✅ Деплой успешен!
+          Репозиторий: ${{ github.repository }}
+          Ветка: ${{ github.ref }}
+          Сервер: ${{ secrets.SSH_HOST }}
+          Запустил: ${{ github.actor }}
+
+          Посмотреть: http://library.trexon.ru
+          
+          Действия на сервере:
+          1. git pull в ~/Desktop/library
+          2. docker-compose down
+          3. docker-compose up --build -d
+          Для просмотра логов: docker-compose logs -f
+
+    - name: Send Telegram notification (Failure)
+      if: failure()
+      uses: appleboy/telegram-action@v1.0.0
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          ❌ Деплой упал!
+          Репозиторий: ${{ github.repository }}
+          Ветка: ${{ github.ref }}
+          Ошибка в шаге: ${{ steps.deploy.outcome }}
+          Подробнее: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
