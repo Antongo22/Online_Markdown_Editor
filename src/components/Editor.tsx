@@ -5,9 +5,10 @@ interface EditorProps {
   content: string;
   onChange: (value: string) => void;
   onEditorDidMount?: (editor: any) => void;
+  mobile?: boolean;
 }
 
-const Editor = ({ content, onChange, onEditorDidMount }: EditorProps): React.ReactElement => {
+const Editor = ({ content, onChange, onEditorDidMount, mobile = false }: EditorProps): React.ReactElement => {
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       onChange(value);
@@ -44,30 +45,32 @@ const Editor = ({ content, onChange, onEditorDidMount }: EditorProps): React.Rea
   }, []);
 
   return (
-    <div className="editor-container">
+    <div className={`editor-container ${mobile ? 'editor-container-mobile' : ''}`}>
       <MonacoEditor
-        height="calc(100vh - 220px)"
+        height={mobile ? "calc(100vh - 160px)" : "calc(100vh - 220px)"}
         defaultLanguage="markdown"
         value={content}
         onChange={handleEditorChange}
         onMount={onEditorDidMount}
         theme="vs-dark"
         options={{
-          minimap: { enabled: false },
-          fontSize: 16,
+          minimap: { enabled: mobile ? false : true },
+          fontSize: mobile ? 14 : 16,
           wordWrap: 'on',
-          lineNumbers: 'on',
+          lineNumbers: mobile ? 'off' : 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,
           selectionHighlight: true,
           contextmenu: true,
-          quickSuggestions: true,
+          quickSuggestions: mobile ? false : true,
           overviewRulerBorder: false,
           scrollbar: {
             vertical: 'auto',
             horizontal: 'auto',
-            verticalScrollbarSize: 10,
-          }
+            verticalScrollbarSize: mobile ? 8 : 10,
+          },
+          folding: mobile ? false : true,
+          glyphMargin: mobile ? false : true
         }}
       />
     </div>

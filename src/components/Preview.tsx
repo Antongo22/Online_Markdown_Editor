@@ -10,13 +10,14 @@ interface PreviewProps {
   content: string;
   documentType: string; // оставляем для совместимости с App.tsx
   uploadedImages?: Record<string, string>;
+  mobile?: boolean;
 }
 
-const Preview = ({ content, uploadedImages = {} }: PreviewProps): React.ReactElement => {
+const Preview = ({ content, uploadedImages = {}, mobile = false }: PreviewProps): React.ReactElement => {
   
   return (
-    <div className="preview-container">
-      <div className="markdown-preview">
+    <div className={`preview-container ${mobile ? 'preview-container-mobile' : ''}`}>
+      <div className={`markdown-preview ${mobile ? 'markdown-preview-mobile' : ''}`}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSlug]}

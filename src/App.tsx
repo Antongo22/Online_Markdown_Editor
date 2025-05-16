@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
-import MobileWarning from './components/MobileWarning';
 import { isMobileDevice } from './utils/deviceDetector';
 import './styles/App.css';
 
@@ -56,13 +55,19 @@ function hello() {
 `;
 
 function App() {
-  // Состояние для мобильного предупреждения
+  // Состояние для мобильного устройства
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Состояние для мобильного вида (редактор/превью)
+  const [mobileView, setMobileView] = useState('editor'); // 'editor' или 'preview'
+  
+  // Состояние для выдвижного меню
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Основное состояние редактора
   const [content, setContent] = useState('');
   
-  // Динамическая ширина панелей
+  // Динамическая ширина панелей (только для десктопа)
   const [editorWidth, setEditorWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   
@@ -144,43 +149,133 @@ function App() {
     });
   };
   
+  // Переключение между редактором и предпросмотром на мобильных устройствах
+  const toggleMobileView = () => {
+    setMobileView(view => view === 'editor' ? 'preview' : 'editor');
+    setIsMobileMenuOpen(false); // Закрыть меню после переключения
+  };
+  
+  // Переключение видимости меню
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(isOpen => !isOpen);
+  };
+
   return (
-    <div className="app dark-theme">
-      {isMobile && <MobileWarning />}
-      
+    <div className={`app dark-theme ${isMobile ? 'mobile-layout' : ''}`}>
       <header className="app-header">
-        <h1>{APP_TITLE}</h1>
-        <Toolbar onAction={handleToolbarAction} />
+        <div className="header-top">
+          <h1>{APP_TITLE}</h1>
+          {isMobile && (
+            <button 
+              className="mobile-menu-button" 
+              onClick={toggleMobileMenu}
+            >
+              <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+            </button>
+          )}
+        </div>
+        
+        {isMobile ? (
+          <div className={`mobile-action-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+            <div className="mobile-menu-section">
+              <h3>Навигация</h3>
+              <div className="mobile-menu-buttons">
+                <button 
+                  className={`mobile-menu-button ${mobileView === 'editor' ? 'active' : ''}`}
+                  onClick={() => setMobileView('editor')}
+                >
+                  <i className="fas fa-code"></i> Редактор
+                </button>
+                <button 
+                  className={`mobile-menu-button ${mobileView === 'preview' ? 'active' : ''}`}
+                  onClick={() => setMobileView('preview')}
+                >
+                  <i className="fas fa-eye"></i> Предпросмотр
+                </button>
+              </div>
+            </div>
+            
+            <div className="mobile-menu-section">
+              <h3>Вставка элементов</h3>
+              <Toolbar onAction={(template) => {
+                handleToolbarAction(template);
+                setIsMobileMenuOpen(false);
+              }} mobile={true} />
+            </div>
+          </div>
+        ) : (
+          <Toolbar onAction={handleToolbarAction} mobile={false} />
+        )}
       </header>
       
-      <div className="content-container" ref={contentRef}>
-        <div 
-          className="editor-pane" 
-          style={{ width: `${editorWidth}%` }}
-        >
-          <Editor 
-            content={content} 
-            onChange={handleContentChange} 
-          />
+      {isMobile ? (
+        // Мобильная версия с переключением между редактором и предпросмотром
+        <div className="mobile-content-container" ref={contentRef}>
+          {mobileView === 'editor' ? (
+            <div className="mobile-editor-pane">
+              <Editor 
+                content={content} 
+                onChange={handleContentChange} 
+                mobile={true}
+              />
+            </div>
+          ) : (
+            <div className="mobile-preview-pane">
+              <Preview 
+                content={content} 
+                documentType="markdown" 
+                mobile={true}
+              />
+            </div>
+          )}
+          
+          {/* Индикатор текущего режима и кнопка быстрого переключения */}
+          <div className="mobile-view-indicator" onClick={toggleMobileView}>
+            {mobileView === 'editor' ? (
+              <>
+                <i className="fas fa-code"></i> Редактор
+              </>
+            ) : (
+              <>
+                <i className="fas fa-eye"></i> Предпросмотр
+              </>  
+            )}
+            <i className="fas fa-exchange-alt"></i>
+          </div>
         </div>
-        
-        <div 
-          className="divider" 
-          ref={dividerRef} 
-          onMouseDown={handleMouseDown}
-          style={{ cursor: isDragging ? 'col-resize' : 'default' }}
-        ></div>
-        
-        <div 
-          className="preview-pane" 
-          style={{ width: `${100 - editorWidth}%` }}
-        >
-          <Preview 
-            content={content} 
-            documentType="markdown" 
-          />
+      ) : (
+        // Десктопная версия с разделенными панелями
+        <div className="content-container" ref={contentRef}>
+          <div 
+            className="editor-pane" 
+            style={{ width: `${editorWidth}%` }}
+          >
+            <Editor 
+              content={content} 
+              onChange={handleContentChange} 
+              mobile={false}
+            />
+          </div>
+          
+          <div 
+            className="divider" 
+            ref={dividerRef} 
+            onMouseDown={handleMouseDown}
+            style={{ cursor: isDragging ? 'col-resize' : 'default' }}
+          ></div>
+          
+          <div 
+            className="preview-pane" 
+            style={{ width: `${100 - editorWidth}%` }}
+          >
+            <Preview 
+              content={content} 
+              documentType="markdown" 
+              mobile={false}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

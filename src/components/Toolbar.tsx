@@ -2,9 +2,10 @@ import React from 'react';
 
 interface ToolbarProps {
   onAction: (template: string) => void;
+  mobile?: boolean;
 }
 
-const Toolbar = ({ onAction }: ToolbarProps): React.ReactElement => {
+const Toolbar = ({ onAction, mobile = false }: ToolbarProps): React.ReactElement => {
   // Markdown шаблоны
   const insertHeading = () => {
     onAction('# Заголовок');
@@ -76,23 +77,43 @@ const Toolbar = ({ onAction }: ToolbarProps): React.ReactElement => {
   };
   
   return (
-    <div className="toolbar">
-      <div className="toolbar-group">
-        <button onClick={insertHeading} title="Заголовок">Заголовок</button>
-        <button onClick={insertSubheading} title="Подзаголовок">Подзаголовок</button>
-        <button onClick={insertBold} title="Жирный"><strong>B</strong></button>
-        <button onClick={insertItalic} title="Курсив"><em>I</em></button>
-      </div>
-      <div className="toolbar-group">
-        <button onClick={insertList} title="Маркированный список">Список</button>
-        <button onClick={insertOrderedList} title="Нумерованный список">Нум. список</button>
-        <button onClick={insertCode} title="Блок кода">Код</button>
-        <button onClick={insertLink} title="Ссылка">Ссылка</button>
-        <button onClick={insertTable} title="Таблица">Таблица</button>
-      </div>
-      <div className="toolbar-group">
-        <button onClick={insertTemplate} title="Вставить шаблон" className="template-btn">Шаблон</button>
-      </div>
+    <div className={`toolbar ${mobile ? 'toolbar-mobile' : ''}`}>
+      {mobile ? (
+        // Мобильная версия панели инструментов - компактная
+        <>
+          <div className="toolbar-group-mobile">
+            <button onClick={insertBold} title="Жирный"><strong>B</strong></button>
+            <button onClick={insertItalic} title="Курсив"><em>I</em></button>
+            <button onClick={insertList} title="Список"><i className="fas fa-list"></i></button>
+            <button onClick={insertCode} title="Код"><i className="fas fa-code"></i></button>
+          </div>
+          <div className="toolbar-group-mobile">
+            <button onClick={insertLink} title="Ссылка"><i className="fas fa-link"></i></button>
+            <button onClick={insertTable} title="Таблица"><i className="fas fa-table"></i></button>
+            <button onClick={insertTemplate} title="Шаблон"><i className="fas fa-file"></i></button>
+          </div>
+        </>
+      ) : (
+        // Десктопная версия панели инструментов
+        <>
+          <div className="toolbar-group">
+            <button onClick={insertHeading} title="Заголовок">Заголовок</button>
+            <button onClick={insertSubheading} title="Подзаголовок">Подзаголовок</button>
+            <button onClick={insertBold} title="Жирный"><strong>B</strong></button>
+            <button onClick={insertItalic} title="Курсив"><em>I</em></button>
+          </div>
+          <div className="toolbar-group">
+            <button onClick={insertList} title="Маркированный список">Список</button>
+            <button onClick={insertOrderedList} title="Нумерованный список">Нум. список</button>
+            <button onClick={insertCode} title="Блок кода">Код</button>
+            <button onClick={insertLink} title="Ссылка">Ссылка</button>
+            <button onClick={insertTable} title="Таблица">Таблица</button>
+          </div>
+          <div className="toolbar-group">
+            <button onClick={insertTemplate} title="Вставить шаблон" className="template-btn">Шаблон</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
