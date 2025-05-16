@@ -56,6 +56,13 @@ body, html {
   max-height: 55px;
 }
 
+.mobile-layout .app-header {
+  padding: 5px 10px;
+  height: 50px;
+  min-height: 50px;
+  max-height: 50px;
+}
+
 .editor-container {
   height: calc(100vh - 56px);
   background-color: #1e1e1e;
@@ -314,13 +321,13 @@ body, html {
   left: 0;
   background-color: #1e1e1e;
   color: white;
-  padding: 4px 10px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  font-size: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  z-index: 1000;
+  z-index: 1001; /* Увеличиваем z-index, чтобы индикатор всегда был сверху */
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.8);
   margin: 0;
   border-top: 1px solid #444;
@@ -331,9 +338,10 @@ body, html {
 .mobile-view-label {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   cursor: pointer;
-  padding: 5px 0;
+  padding: 3px 0;
+  font-size: 0.7rem;
 }
 
 .mobile-quick-actions {
@@ -373,12 +381,14 @@ body, html {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 90px); /* Учитываем высоту меню и индикатора (50px + 40px) */
   margin: 0;
   padding: 0;
   position: relative;
-  top: 60px;
+  top: 50px;
   z-index: 1;
+  max-height: calc(100vh - 90px);
+  padding-bottom: 40px; /* Добавляем отступ снизу */
 }
 
 .app {
@@ -417,21 +427,24 @@ body, html {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
 .mobile-editor-pane {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% - 32px); /* Вычитаем высоту mobile-view-indicator */
   margin: 0;
   padding: 0;
   position: relative;
+  padding-bottom: 40px; /* Дополнительный отступ снизу */
+  overflow: hidden;
 }
 
 /* Стили для мобильного превью */
 .preview-container-mobile {
-  padding: 15px 15px 55px 15px;
+  padding: 8px 8px 35px 8px;
   height: 100%;
   overflow-y: auto;
   flex: 1;
@@ -441,7 +454,7 @@ body, html {
   width: 100%;
   position: absolute;
   top: 0;
-  bottom: 40px;
+  bottom: 32px;
 }
 
 .mobile-preview-pane {
@@ -733,6 +746,24 @@ body, html {
   display: flex;
   gap: 5px;
   margin-left: 15px;
+}
+
+.quick-action-button {
+  background-color: transparent;
+  color: #e0e0e0;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
 .edit-action-button {
@@ -1286,16 +1317,16 @@ body, html {
 .mobile-editor-actions {
   display: flex;
   position: fixed;
-  bottom: 60px;
+  bottom: 70px;
   right: 10px;
   z-index: 1000;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .mobile-editor-button {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: rgba(50, 50, 50, 0.8);
   color: white;

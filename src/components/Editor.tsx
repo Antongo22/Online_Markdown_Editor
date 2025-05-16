@@ -127,7 +127,7 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
     }
   };
   
-  // Прокрутка к концу содержимого
+  // Прокрутка к концу содержимого (просто прокрутка)
   const scrollToBottom = () => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -137,6 +137,38 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
     
     const lineCount = model.getLineCount();
     editor.revealLine(lineCount);
+    editor.setPosition({ lineNumber: lineCount, column: model.getLineMaxColumn(lineCount) });
+    editor.focus();
+  };
+  
+  // Добавление новой строки в конец документа
+  const addNewLineAtBottom = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    
+    const model = editor.getModel();
+    if (!model) return;
+    
+    const lineCount = model.getLineCount();
+    
+    // Добавляем пустые строки в конец документа
+    editor.executeEdits('', [
+      {
+        range: {
+          startLineNumber: lineCount + 1,
+          startColumn: 1,
+          endLineNumber: lineCount + 1,
+          endColumn: 1
+        },
+        text: '\n\n',
+        forceMoveMarkers: true
+      }
+    ]);
+    
+    // Перемещаем курсор на новую строку и обновляем содержимое
+    editor.setPosition({ lineNumber: lineCount + 2, column: 1 });
+    editor.focus();
+    handleEditorChange(model.getValue());
   };
   
   // Прокрутка к началу содержимого
@@ -145,6 +177,36 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
     if (!editor) return;
     
     editor.revealLine(1);
+  };
+  
+  // Добавление табуляции в текущей позиции
+  const addTab = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    
+    const model = editor.getModel();
+    if (!model) return;
+    
+    const position = editor.getPosition();
+    if (!position) return;
+    
+    // Добавляем таб на текущей позиции
+    editor.executeEdits('', [
+      {
+        range: {
+          startLineNumber: position.lineNumber,
+          startColumn: position.column,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column
+        },
+        text: '\t',
+        forceMoveMarkers: true
+      }
+    ]);
+    
+    // Фокусируем редактор и обновляем содержимое
+    editor.focus();
+    handleEditorChange(model.getValue());
   };
   
   // Регистрируем обработчики функций, если они переданы извне
@@ -172,6 +234,12 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
           </button>
           <button className="mobile-editor-button" onClick={scrollToBottom} title="К концу">
             <i className="fas fa-arrow-down"></i>
+          </button>
+          <button className="mobile-editor-button" onClick={addNewLineAtBottom} title="Добавить пустую строку внизу">
+            <i className="fas fa-level-down-alt"></i>
+          </button>
+          <button className="mobile-editor-button" onClick={addTab} title="Добавить табуляцию">
+            <i className="fas fa-indent"></i>
           </button>
         </div>
       )}
