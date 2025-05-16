@@ -39,7 +39,7 @@ jobs:
           Сервер: ${{ secrets.SSH_HOST }}
           Запустил: ${{ github.actor }}
 
-          Посмотреть: http://library.trexon.ru
+          Посмотреть: http://md.trexon.ru
           
           Действия на сервере:
           1. git pull в ~/Desktop/library
