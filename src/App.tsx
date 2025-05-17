@@ -90,8 +90,8 @@ function App() {
       const isMobileCheck = isMobileDevice() || window.innerWidth < 550;
       setIsMobile(isMobileCheck);
       
-      // Мобильное меню для экранов меньше 1300px
-      const shouldUseMobileMenu = window.innerWidth < 1405;
+      // Мобильное меню для экранов меньше 1450px
+      const shouldUseMobileMenu = window.innerWidth < 1450;
       setUseMobileMenu(shouldUseMobileMenu);
     };
     

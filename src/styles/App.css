@@ -64,7 +64,7 @@ body, html {
 }
 
 .editor-container {
-  height: calc(100vh - 56px);
+  height: calc(100vh - 40px);
   background-color: #1e1e1e;
   border-radius: 5px 0 0 5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -190,6 +190,8 @@ body, html {
 .mobile-layout {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .mobile-layout .app-header {
@@ -213,6 +215,41 @@ body, html {
 }
 
 /* Мобильная кнопка меню */
+/* Навигационные кнопки слева */
+.navigation-buttons {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+
+.nav-button {
+  background-color: transparent;
+  border: none;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  border-right: 1px solid #333;
+}
+
+.nav-button:hover {
+  opacity: 1;
+  background-color: #252525;
+}
+
+.nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Мобильная кнопка меню на весь хедер */
 .mobile-menu-button {
   background-color: transparent;
   border: none;
@@ -231,24 +268,138 @@ body, html {
 
 /* Выдвижное меню действий */
 .mobile-action-menu {
-  position: absolute;
-  top: 100%;
+  position: fixed;
+  top: 50px;
   left: 0;
-  right: 0;
-  background-color: #292929;
-  padding: 0;
+  width: 100%;
+  background-color: #1e1e1e;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: max-height 0.3s ease, opacity 0.3s ease;
   z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  padding: 20px;
 }
 
 .mobile-action-menu.open {
-  max-height: 800px;
-  padding: 15px 15px 25px 15px;
-  overflow-y: hidden;
-  z-index: 9999;
+  max-height: 100vh;
+  opacity: 1;
+  visibility: visible;
+  overflow-y: auto;
+}
+
+.mobile-menu-content {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-title {
+  background-color: #252525;
+  color: #ffffff;
+  padding: 15px;
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid #333;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.menu-section {
+  padding: 20px 15px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 5px;
+}
+
+.menu-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #ccc;
+  padding-left: 5px;
+}
+
+.menu-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 5px;
+}
+
+.menu-btn {
+  background-color: #333;
+  border: none;
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.menu-buttons .menu-btn {
+  min-width: 64px;
+  min-height: 44px;
+}
+
+.menu-btn:hover {
+  background-color: #444;
+}
+
+.format-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.developer-info {
+  padding: 10px;
+  background-color: #252525;
+  border-radius: 4px;
+  font-family: monospace;
+  margin-bottom: 10px;
+}
+
+.file-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.menu-btn.green {
+  background-color: #4CAF50;
+}
+
+.menu-btn.blue {
+  background-color: #2196F3;
+}
+
+.menu-btn.red {
+  background-color: #F44336;
+}
+
+.mobile-action-menu.open {
+  max-height: 100vh;
+  opacity: 1;
+  visibility: visible;
+  overflow-y: auto;
 }
 
 .mobile-menu-section {
@@ -283,6 +434,30 @@ body, html {
   cursor: pointer;
   transition: all 0.2s;
   flex: 1;
+}
+
+.mobile-menu-about {
+  padding: 10px;
+  background-color: #252525;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.mobile-company-link {
+  color: #e0e0e0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.mobile-company-link i {
+  margin-right: 8px;
+}
+
+.company-name {
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 .mobile-menu-button.active {
@@ -341,24 +516,26 @@ body, html {
 
 /* Индикатор текущего режима */
 .mobile-view-indicator {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   right: 0;
   left: 0;
   background-color: #1e1e1e;
   color: white;
-  padding: 3px 8px;
+  padding: 0px 8px;
   font-size: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  z-index: 1001; /* Увеличиваем z-index, чтобы индикатор всегда был сверху */
+  z-index: 1001;
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.8);
   margin: 0;
   border-top: 1px solid #444;
-  height: 40px;
-  max-height: 40px;
+  height: 20px;
+  min-height: 20px;
+  max-height: 20px;
+  margin-top: 50px; /* Компенсируем отрицательный отступ обертки */
 }
 
 .mobile-view-label {
@@ -400,21 +577,19 @@ body, html {
   transform: translateY(-2px);
 }
 
-/* Контейнер для мобильного вида */
+/* Контейнер для мобильного вида - радикальное решение */
 .mobile-content-container {
-  flex: 1;
+  height: calc(100vh - 110px); /* Высота с учетом увеличенной шапки и футера */
   overflow: hidden;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: calc(100vh - 90px); /* Учитываем высоту меню и индикатора (50px + 40px) */
-  margin: 0;
-  padding: 0;
   position: relative;
-  top: 50px;
-  z-index: 1;
-  max-height: calc(100vh - 90px);
-  padding-bottom: 40px; /* Добавляем отступ снизу */
+  width: 100%;
+  flex: 1;
+  border-top: none;
+  background-color: #1e1e1e;
+  margin-top: 0; /* Убираем отступ, чтобы сдвинуть выше */
 }
 
 .app {
@@ -462,17 +637,17 @@ body, html {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 32px); /* Вычитаем высоту mobile-view-indicator */
+  height: calc(100% - 20px); /* Новый размер индикатора */
   margin: 0;
   padding: 0;
   position: relative;
-  padding-bottom: 40px; /* Дополнительный отступ снизу */
+  padding-bottom: 20px; /* Уменьшенный отступ */
   overflow: hidden;
 }
 
 /* Стили для мобильного превью */
 .preview-container-mobile {
-  padding: 8px 8px 35px 8px;
+  padding: 1px 5px 20px 5px; /* Минимальный отступ сверху */
   height: 100%;
   overflow-y: auto;
   flex: 1;
@@ -481,8 +656,10 @@ body, html {
   right: 0;
   width: 100%;
   position: absolute;
-  top: 0;
-  bottom: 32px;
+  top: -1px; /* Немного перекрываем верх */
+  bottom: 20px;
+  border-top: none;
+  margin-top: 0;
 }
 
 .mobile-preview-pane {
@@ -494,6 +671,7 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  margin-top: -1px; /* Отрицательный отступ сверху */
 }
 
 .markdown-preview-mobile {
@@ -772,16 +950,19 @@ body, html {
 .full-width-toolbar {
   display: flex;
   width: 100%;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 30px;
+  padding: 10px 15px;
+  margin-bottom: 5px;
 }
 
 .toolbar-section {
   display: flex;
-  gap: 5px;
+  gap: 10px;
   align-items: center;
   justify-content: center;
+  margin: 0 5px;
 }
 
 /* Кнопки действий редактирования */
