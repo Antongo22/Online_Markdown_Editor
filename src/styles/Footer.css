@@ -1,0 +1,59 @@
+/* Стили для футера с информацией о компании */
+
+/* Стили для ссылки о разработчике в мобильном меню */
+.mobile-menu-about {
+  padding: 8px 0;
+}
+
+.mobile-company-link {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  color: #e0e0e0;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background-color: #333;
+  border-radius: 4px;
+}
+
+.mobile-company-link:hover {
+  background-color: #444;
+  color: #fff;
+}
+.app-footer {
+  padding: 10px 20px;
+  background-color: #1e1e1e;
+  border-top: 1px solid #444;
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.company-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.company-link:hover {
+  color: #fff;
+}
+
+.company-name {
+  font-weight: bold;
+  color: #aaa;
+}
+
+.company-link:hover .company-name {
+  color: #fff;
+}

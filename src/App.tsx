@@ -4,6 +4,7 @@ import Preview from './components/Preview';
 import Toolbar from './components/Toolbar';
 import { isMobileDevice } from './utils/deviceDetector';
 import './styles/App.css';
+import './styles/Footer.css';
 
 // Константы приложения
 const APP_TITLE = 'Markdown Editor';
@@ -86,11 +87,11 @@ function App() {
   useEffect(() => {
     const checkDevice = () => {
       // Настоящий мобильный режим только для узких экранов и мобильных устройств
-      const isMobileCheck = isMobileDevice() || window.innerWidth < 500;
+      const isMobileCheck = isMobileDevice() || window.innerWidth < 550;
       setIsMobile(isMobileCheck);
       
-      // Мобильное меню для экранов меньше 1500px
-      const shouldUseMobileMenu = window.innerWidth < 1500;
+      // Мобильное меню для экранов меньше 1300px
+      const shouldUseMobileMenu = window.innerWidth < 1405;
       setUseMobileMenu(shouldUseMobileMenu);
     };
     
@@ -340,6 +341,15 @@ function App() {
                 setIsMobileMenuOpen(false);
               }} mobile={true} />
             </div>
+
+            <div className="mobile-menu-section">
+              <h3>О разработчике</h3>
+              <div className="mobile-menu-about">
+                <a href="http://trexon.ru/" target="_blank" rel="noopener noreferrer" className="mobile-company-link">
+                  <i className="fas fa-code"></i> Разработано компанией <span className="company-name">Trexon</span>
+                </a>
+              </div>
+            </div>
             
             <div className="mobile-menu-section">
               <h3>Файлы и действия</h3>
@@ -347,10 +357,10 @@ function App() {
                 <label 
                   className="mobile-menu-button"
                 >
-                  <i className="fas fa-file-upload"></i> Загрузить MD
+                  <i className="fas fa-file-upload"></i> <span className="button-text">Загрузить MD</span>
                   <input 
                     type="file" 
-                    accept=".md, .markdown, .txt"
+                    accept=".md"
                     style={{ display: 'none' }}
                     onChange={handleFileUpload}
                   />
@@ -359,13 +369,13 @@ function App() {
                   className="mobile-menu-button"
                   onClick={handleSaveAsMd}
                 >
-                  <i className="fas fa-file-download"></i> Сохранить MD
+                  <i className="fas fa-file-download"></i> <span className="button-text">Сохранить MD</span>
                 </button>
                 <button 
                   className="mobile-menu-button danger-button"
                   onClick={handleClearAll}
                 >
-                  <i className="fas fa-trash"></i> Очистить всё
+                  <i className="fas fa-trash"></i> <span className="button-text">Очистить всё</span>
                 </button>
               </div>
             </div>
@@ -402,9 +412,10 @@ function App() {
                   title="Загрузить MD"
                 >
                   <i className="fas fa-file-upload"></i>
+                  <span className="button-text">Загрузить</span>
                   <input 
                     type="file" 
-                    accept=".md, .markdown, .txt"
+                    accept=".md"
                     style={{ display: 'none' }}
                     onChange={handleFileUpload}
                   />
@@ -415,6 +426,7 @@ function App() {
                   title="Сохранить как MD"
                 >
                   <i className="fas fa-file-download"></i>
+                  <span className="button-text">Сохранить</span>
                 </button>
                 <button 
                   className="edit-action-button danger-button" 
@@ -422,6 +434,7 @@ function App() {
                   title="Очистить всё"
                 >
                   <i className="fas fa-trash"></i>
+                  <span className="button-text">Очистить</span>
                 </button>
               </div>
             </div>
@@ -482,6 +495,16 @@ function App() {
               >
                 <i className="fas fa-redo"></i>
               </button>
+              <button 
+                className="quick-action-button" 
+                onClick={() => {
+                  navigator.clipboard.writeText(content);
+                  alert('Текст скопирован в буфер обмена');
+                }}
+                title="Копировать весь текст"
+              >
+                <i className="fas fa-copy"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -518,6 +541,16 @@ function App() {
           </div>
         </div>
       )}
+      
+      {/* Футер с информацией о компании */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <a href="http://trexon.ru/" target="_blank" rel="noopener noreferrer" className="company-link">
+            <span>Разработано компанией</span>
+            <span className="company-name">Trexon</span>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

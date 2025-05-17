@@ -49,7 +49,7 @@ body, html {
   color: white;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 9000;
   border-bottom: 1px solid #444;
   height: 55px;
   min-height: 55px;
@@ -225,6 +225,8 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 3000;
+  position: relative;
 }
 
 /* Выдвижное меню действий */
@@ -239,17 +241,18 @@ body, html {
   overflow: hidden;
   transition: max-height 0.3s ease, padding 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  z-index: 99;
+  z-index: 9999;
 }
 
 .mobile-action-menu.open {
-  max-height: 500px;
-  padding: 15px;
-  overflow-y: auto;
+  max-height: 800px;
+  padding: 15px 15px 25px 15px;
+  overflow-y: hidden;
+  z-index: 9999;
 }
 
 .mobile-menu-section {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .mobile-menu-section h3 {
@@ -287,7 +290,7 @@ body, html {
 }
 
 .mobile-menu-button i {
-  margin-right: 5px;
+  margin-right: 0;
 }
 
 /* Кнопка удаления */
@@ -402,12 +405,14 @@ body, html {
 .toolbar-mobile {
   padding: 5px;
   overflow-x: auto;
+  z-index: 2000;
 }
 
 .toolbar-group-mobile {
   display: flex;
   gap: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
+  margin-right: 12px;
 }
 
 .toolbar-group-mobile button {
@@ -798,6 +803,39 @@ body, html {
   transition: all 0.2s ease;
 }
 
+/* Скрываем все тексты на кнопках */
+.file-upload-button span:not(.icon),
+.edit-action-button span:not(.icon),
+.toolbar-mobile span:not(.icon),
+.mobile-menu-button span:not(.icon),
+.mobile-menu-buttons button span:not(.icon) {
+  display: none !important;
+}
+
+/* Скрываем весь текст в мобильных кнопках, кроме иконок */
+.mobile-menu-buttons button {
+  font-size: 0 !important;
+}
+
+.mobile-menu-buttons button i {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Условно скрываем текст на кнопках работы с файлами */
+@media (max-width: 500px) {
+  .toolbar button,
+  .toolbar label.upload-btn {
+    font-size: 0;
+  }
+  
+  .toolbar button i,
+  .toolbar label.upload-btn i {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
 .file-upload-button {
   position: relative;
   overflow: hidden;
@@ -1070,7 +1108,7 @@ body, html {
   padding: 4px 10px;
   border-bottom-left-radius: 5px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  z-index: 10;
+  z-index: 5;
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 0.5px;
