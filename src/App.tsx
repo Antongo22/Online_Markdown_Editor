@@ -355,7 +355,7 @@ function App() {
               <h3>Файлы и действия</h3>
               <div className="mobile-menu-buttons">
                 <label 
-                  className="mobile-menu-button"
+                  className="mobile-menu-button upload-button"
                 >
                   <i className="fas fa-file-upload"></i> <span className="button-text">Загрузить MD</span>
                   <input 
@@ -366,7 +366,7 @@ function App() {
                   />
                 </label>
                 <button 
-                  className="mobile-menu-button"
+                  className="mobile-menu-button save-button"
                   onClick={handleSaveAsMd}
                 >
                   <i className="fas fa-file-download"></i> <span className="button-text">Сохранить MD</span>
@@ -408,7 +408,7 @@ function App() {
               
               <div className="toolbar-section file-actions-section">
                 <label 
-                  className="edit-action-button file-upload-button"
+                  className="edit-action-button file-upload-button upload-button"
                   title="Загрузить MD"
                 >
                   <i className="fas fa-file-upload"></i>
@@ -421,7 +421,7 @@ function App() {
                   />
                 </label>
                 <button 
-                  className="edit-action-button" 
+                  className="edit-action-button save-button" 
                   onClick={handleSaveAsMd} 
                   title="Сохранить как MD"
                 >

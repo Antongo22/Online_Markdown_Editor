@@ -269,7 +269,8 @@ body, html {
   margin-bottom: 15px;
 }
 
-.mobile-menu-button {
+.mobile-menu-buttons button,
+.mobile-menu-buttons label {
   padding: 8px 12px;
   font-size: 0.9rem;
   display: inline-flex;
@@ -293,7 +294,7 @@ body, html {
   margin-right: 0;
 }
 
-/* Кнопка удаления */
+/* Цветные кнопки */
 .danger-button {
   background-color: #a22 !important;
   color: white !important;
@@ -302,6 +303,28 @@ body, html {
 
 .danger-button:hover {
   background-color: #c33 !important;
+}
+
+/* Зелёная кнопка для загрузки файла */
+.upload-button {
+  background-color: #28a745 !important;
+  color: white !important;
+  border-color: #218838 !important;
+}
+
+.upload-button:hover {
+  background-color: #218838 !important;
+}
+
+/* Синяя кнопка для сохранения файла */
+.save-button {
+  background-color: #007bff !important;
+  color: white !important;
+  border-color: #0069d9 !important;
+}
+
+.save-button:hover {
+  background-color: #0069d9 !important;
 }
 
 /* Кнопки выбора действия */

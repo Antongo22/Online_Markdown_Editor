@@ -34,6 +34,14 @@ const Toolbar = ({ onAction, mobile = false }: ToolbarProps): React.ReactElement
   const insertOrderedList = () => {
     onAction('1. Первый элемент\n2. Второй элемент\n3. Третий элемент');
   };
+  
+  const insertCheckboxList = () => {
+    onAction('- [x] Выполненная задача\n- [ ] Невыполненная задача\n- [ ] Еще одна задача');
+  };
+  
+  const insertSpoiler = () => {
+    onAction('<details>\n<summary>Нажмите, чтобы развернуть</summary>\n\nСкрытый текст здесь\n\n</details>');
+  };
 
   const insertLink = () => {
     onAction('[Текст ссылки](https://example.com)');
@@ -85,9 +93,12 @@ const Toolbar = ({ onAction, mobile = false }: ToolbarProps): React.ReactElement
             <button onClick={insertBold} title="Жирный"><strong>B</strong></button>
             <button onClick={insertItalic} title="Курсив"><em>I</em></button>
             <button onClick={insertList} title="Список"><i className="fas fa-list"></i></button>
+            <button onClick={insertOrderedList} title="Нумерованный список"><i className="fas fa-list-ol"></i></button>
+            <button onClick={insertCheckboxList} title="Список с чекбоксами"><i className="fas fa-tasks"></i></button>
             <button onClick={insertCode} title="Код"><i className="fas fa-code"></i></button>
           </div>
           <div className="toolbar-group-mobile">
+            <button onClick={insertSpoiler} title="Скрытый текст"><i className="fas fa-eye-slash"></i></button>
             <button onClick={insertLink} title="Ссылка"><i className="fas fa-link"></i></button>
             <button onClick={insertTable} title="Таблица"><i className="fas fa-table"></i></button>
             <button onClick={insertTemplate} title="Шаблон"><i className="fas fa-file"></i></button>
@@ -103,6 +114,8 @@ const Toolbar = ({ onAction, mobile = false }: ToolbarProps): React.ReactElement
             <button onClick={insertItalic} title="Курсив"><i className="fas fa-italic"></i></button>
             <button onClick={insertList} title="Маркированный список"><i className="fas fa-list-ul"></i></button>
             <button onClick={insertOrderedList} title="Нумерованный список"><i className="fas fa-list-ol"></i></button>
+            <button onClick={insertCheckboxList} title="Список с чекбоксами"><i className="fas fa-tasks"></i></button>
+            <button onClick={insertSpoiler} title="Скрытый текст"><i className="fas fa-eye-slash"></i></button>
             <button onClick={insertCode} title="Блок кода"><i className="fas fa-code"></i></button>
             <button onClick={insertLink} title="Ссылка"><i className="fas fa-link"></i></button>
             <button onClick={insertTable} title="Таблица"><i className="fas fa-table"></i></button>
