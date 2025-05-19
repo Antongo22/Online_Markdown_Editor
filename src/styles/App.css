@@ -647,13 +647,13 @@ body, html {
 
 /* Стили для мобильного превью */
 .preview-container-mobile {
-  padding: 1px 5px 20px 5px; /* Минимальный отступ сверху */
+  padding: 1px 5px 80px 5px; /* Еще больше увеличиваем отступ снизу для предотвращения перекрытия футером */
   height: 100%;
   overflow-y: auto;
   flex: 1;
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  left: 0;
-  right: 0;
   width: 100%;
   position: absolute;
   top: -1px; /* Немного перекрываем верх */
@@ -1142,11 +1142,11 @@ body, html {
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: calc(100vh - 56px);
+  padding: 0;
+  gap: 0px;
   position: relative;
   margin-top: 0;
   margin-bottom: 0;
-  padding-bottom: 0;
   border-top: 1px solid #444;
   min-height: 500px;
   max-height: calc(100vh - 56px);
@@ -1158,6 +1158,10 @@ body, html {
   height: 100%;
   overflow: auto;
   max-height: calc(100vh - 56px);
+}
+
+.preview-pane {
+  padding-bottom: 50px; /* Увеличиваем отступ для превью на 10 пикселей */
 }
 
 .editor-pane {
@@ -1190,7 +1194,7 @@ body, html {
 /* Стили превью */
 .preview-container {
   background-color: #252525;
-  padding: 1.2rem;
+  padding: 2rem;
   border: none;
   border-radius: 0;
   height: 100%;
