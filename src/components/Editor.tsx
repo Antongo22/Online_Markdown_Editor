@@ -8,9 +8,10 @@ interface EditorProps {
   mobile?: boolean;
   onSelectLine?: () => void;
   onCopyAll?: () => void;
+  onCursorChange?: (position: { lineNumber: number; column: number } | null) => void;
 }
 
-const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectLine, onCopyAll }: EditorProps): React.ReactElement => {
+const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectLine, onCopyAll, onCursorChange }: EditorProps): React.ReactElement => {
   // Храним редактор в ref, чтобы иметь к нему доступ из разных функций
   const editorRef = useRef<any>(null);
   const handleEditorChange = (value: string | undefined) => {
@@ -52,6 +53,15 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
   const handleEditorDidMount = (editor: any) => {
     // Сохраняем инстанс редактора в ref
     editorRef.current = editor;
+    
+    // Добавляем обработчик изменения положения курсора
+    editor.onDidChangeCursorPosition((e: any) => {
+      if (onCursorChange) {
+        // Передаем новую позицию курсора
+        onCursorChange(e.position);
+      }
+    });
+    
     if (mobile && editor) {
       // Добавляем обработчик двойного клика для мобильных устройств
       editor.onMouseDown((e: any) => {

@@ -68,6 +68,9 @@ function App() {
   // Основное состояние редактора
   const [content, setContent] = useState('');
   
+  // Состояние для позиции курсора
+  const [cursorPosition, setCursorPosition] = useState<{ lineNumber: number; column: number } | null>(null);
+  
   // История редактирования для Undo/Redo
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -205,9 +208,31 @@ function App() {
   
   // Вставка шаблонного кода/текста в редактор
   const handleToolbarAction = (templateContent: string) => {
-    setContent((prevContent) => {
-      return prevContent + templateContent;
-    });
+    let newContent;
+    
+    // Если известна позиция курсора, вставляем в эту позицию
+    if (cursorPosition) {
+      // Получаем содержимое до и после позиции курсора
+      const lines = content.split('\n');
+      let charCount = 0;
+      let insertIndex = 0;
+      
+      // Находим позицию для вставки в общем тексте
+      for (let i = 0; i < cursorPosition.lineNumber - 1; i++) {
+        charCount += lines[i].length + 1; // +1 для \n
+      }
+      
+      insertIndex = charCount + cursorPosition.column - 1;
+      
+      // Вставляем шаблон в позицию курсора
+      newContent = content.substring(0, insertIndex) + templateContent + content.substring(insertIndex);
+    } else {
+      // Если позиция курсора неизвестна, добавляем в конец текста
+      newContent = content + templateContent;
+    }
+    
+    setContent(newContent);
+    handleContentChange(newContent);
   };
   
   // Очистка всего кода
@@ -451,6 +476,7 @@ function App() {
                 content={content} 
                 onChange={handleContentChange} 
                 mobile={true}
+                onCursorChange={setCursorPosition}
               />
             </div>
           ) : (
@@ -519,6 +545,7 @@ function App() {
               content={content} 
               onChange={handleContentChange} 
               mobile={false}
+              onCursorChange={setCursorPosition}
             />
           </div>
           
