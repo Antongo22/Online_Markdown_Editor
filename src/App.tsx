@@ -206,32 +206,77 @@ function App() {
     }
   };
   
+  // Ссылка на текущий редактор
+  const editorRef = useRef<any>(null);
+  
+  // Функция установки ссылки на редактор
+  const handleEditorRef = (editor: any) => {
+    editorRef.current = editor;
+  };
+  
   // Вставка шаблонного кода/текста в редактор
   const handleToolbarAction = (templateContent: string) => {
+    // Прямая вставка в редактор Monaco
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      
+      // Получаем текущую позицию
+      const position = editor.getPosition();
+      const selection = editor.getSelection();
+      const model = editor.getModel();
+      
+      if (position && model) {
+        // Создаем редактирование для позиции курсора
+        const range = selection && !selection.isEmpty() ? 
+          selection : 
+          { startLineNumber: position.lineNumber, startColumn: position.column, endLineNumber: position.lineNumber, endColumn: position.column };
+          
+        // Вставляем текст в позицию курсора
+        editor.executeEdits('template-insertion', [{
+          range: range,
+          text: templateContent,
+          forceMoveMarkers: true
+        }]);
+        
+        // Получаем обновленный контент и обновляем состояние
+        const updatedContent = model.getValue();
+        
+        // Обновляем состояние и историю
+        handleContentChange(updatedContent);
+        
+        // Позиционируем курсор в конце вставленного текста
+        // Но сначала даем время на обновление редактора
+        setTimeout(() => {
+          editor.focus();
+        }, 10);
+        
+        return;
+      }
+    }
+    
+    // Запасной вариант, если нет доступа к редактору
     let newContent;
     
     // Если известна позиция курсора, вставляем в эту позицию
     if (cursorPosition) {
-      // Получаем содержимое до и после позиции курсора
       const lines = content.split('\n');
       let charCount = 0;
-      let insertIndex = 0;
       
       // Находим позицию для вставки в общем тексте
       for (let i = 0; i < cursorPosition.lineNumber - 1; i++) {
         charCount += lines[i].length + 1; // +1 для \n
       }
       
-      insertIndex = charCount + cursorPosition.column - 1;
+      const insertIndex = charCount + cursorPosition.column - 1;
       
-      // Вставляем шаблон в позицию курсора
+      // Вставляем текст в позицию курсора
       newContent = content.substring(0, insertIndex) + templateContent + content.substring(insertIndex);
     } else {
-      // Если позиция курсора неизвестна, добавляем в конец текста
+      // Если позиция курсора неизвестна, добавляем в конец
       newContent = content + templateContent;
     }
     
-    setContent(newContent);
+    // Обновляем состояние
     handleContentChange(newContent);
   };
   
@@ -477,6 +522,7 @@ function App() {
                 onChange={handleContentChange} 
                 mobile={true}
                 onCursorChange={setCursorPosition}
+                onEditorRef={handleEditorRef}
               />
             </div>
           ) : (
@@ -546,6 +592,7 @@ function App() {
               onChange={handleContentChange} 
               mobile={false}
               onCursorChange={setCursorPosition}
+              onEditorRef={handleEditorRef}
             />
           </div>
           

@@ -9,9 +9,10 @@ interface EditorProps {
   onSelectLine?: () => void;
   onCopyAll?: () => void;
   onCursorChange?: (position: { lineNumber: number; column: number } | null) => void;
+  onEditorRef?: (editor: any) => void; // Добавляем функцию для передачи ссылки на редактор
 }
 
-const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectLine, onCopyAll, onCursorChange }: EditorProps): React.ReactElement => {
+const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectLine, onCopyAll, onCursorChange, onEditorRef }: EditorProps): React.ReactElement => {
   // Храним редактор в ref, чтобы иметь к нему доступ из разных функций
   const editorRef = useRef<any>(null);
   const handleEditorChange = (value: string | undefined) => {
@@ -53,6 +54,11 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
   const handleEditorDidMount = (editor: any) => {
     // Сохраняем инстанс редактора в ref
     editorRef.current = editor;
+    
+    // Передаем ссылку на редактор в родительский компонент, если функция передана
+    if (onEditorRef) {
+      onEditorRef(editor);
+    }
     
     // Добавляем обработчик изменения положения курсора
     editor.onDidChangeCursorPosition((e: any) => {
