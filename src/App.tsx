@@ -311,29 +311,81 @@ function App() {
     setIsMobileMenuOpen(false);
   };
   
-  // Сохранение в MD файл
-  const handleSaveAsMd = () => {
+  // Сохранение в MD файл с выбором места сохранения
+  const handleSaveAsMd = async () => {
     if (!content) {
       alert('Нет содержимого для сохранения');
       return;
     }
     
-    // Создаем Blob из содержимого
-    const blob = new Blob([content], { type: 'text/markdown' });
+    try {
+      // Получаем первую непустую строку без MD разметки для имени файла
+      let defaultFileName = 'document.md';
+      
+      // Получаем все строки документа
+      const lines = content.split('\n');
+      
+      // Ищем первую непустую строку
+      for (const line of lines) {
+        // Игнорируем пробелы, табуляцию и другие пустые символы
+        const trimmedLine = line.trim();
+        if (trimmedLine) {
+          // Удаляем маркеры заголовков (# ## ### и т.д.)
+          const cleanTitle = trimmedLine.replace(/^#+\s*/, '');
+          
+          if (cleanTitle) {
+            // Преобразуем в допустимое имя файла, убирая недопустимые символы
+            defaultFileName = cleanTitle.replace(/[\/:*?"<>|]/g, '_').substring(0, 100) + '.md';
+            break; // Нашли первую непустую строку, выходим из цикла
+          }
+        }
+      }
+      
+      // Используем File System Access API для открытия диалога сохранения
+      if ('showSaveFilePicker' in window) {
+        // Современные браузеры с поддержкой File System Access API
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: defaultFileName,
+          types: [{
+            description: 'Markdown файл',
+            accept: { 'text/markdown': ['.md'] }
+          }]
+        });
+        
+        // Создаем записываемый поток
+        const writable = await fileHandle.createWritable();
+        await writable.write(content);
+        await writable.close();
+      } else {
+        // Запасной вариант для старых браузеров
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = defaultFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Ошибка при сохранении файла:', error);
+      
+      // Проверяем, не является ли ошибка отменой пользователя
+      const errorMessage = String(error);
+      const isUserCancelled = errorMessage.includes('user aborted') || 
+                            errorMessage.includes('abort') || 
+                            errorMessage.includes('cancel') || 
+                            errorMessage.includes('The user aborted a request');
+      
+      // Показываем алерт только если это не отмена пользователем
+      if (!isUserCancelled) {
+        alert('Произошла ошибка при сохранении файла. Попробуйте еще раз.');
+      }
+    }
     
-    // Создаем URL и ссылку для загрузки
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'document.md';
-    
-    // Добавляем ссылку на страницу, кликаем по ней и удаляем
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Освобождаем URL
-    URL.revokeObjectURL(url);
     setIsMobileMenuOpen(false);
   };
   
