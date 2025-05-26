@@ -57,6 +57,21 @@ const Preview = ({ content, uploadedImages = {}, mobile = false }: PreviewProps)
             pre({node, ...props}: any) {
               return <pre {...props} />;
             },
+            // Добавляем обработчик ссылок, чтобы они открывались в новой вкладке
+            a({node, ...props}: any) {
+              // Добавляем target="_blank" и rel="noopener noreferrer" для безопасности
+              return (
+                <a 
+                  {...props} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="markdown-link"
+                >
+                  {props.children}
+                </a>
+              );
+            },
+            
             img({node, ...props}: any) {
               const src = props.src || '';
               // Проверка, есть ли загруженное изображение
