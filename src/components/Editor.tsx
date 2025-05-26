@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Editor as MonacoEditor } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 
 interface EditorProps {
   content: string;
@@ -68,6 +69,23 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
       }
     });
     
+    // Добавляем горячие клавиши через API Monaco Editor
+    // Это более надежный способ, чем слушать события на уровне window
+    
+    // Регистрируем Ctrl+S/Cmd+S для сохранения
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      // Генерируем пользовательское событие для сохранения
+      const event = new CustomEvent('app-save-file', { bubbles: true });
+      document.dispatchEvent(event);
+    });
+    
+    // Регистрируем Ctrl+O/Cmd+O для открытия
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
+      // Генерируем пользовательское событие для открытия файла
+      const event = new CustomEvent('app-open-file', { bubbles: true });
+      document.dispatchEvent(event);
+    });
+    
     if (mobile && editor) {
       // Добавляем обработчик двойного клика для мобильных устройств
       editor.onMouseDown((e: any) => {
@@ -94,7 +112,40 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
       });
     }
     
-    // Передаем редактор внешнему обработчику, если он есть
+    // Добавляем поддержку перетаскивания файлов на редактор
+    const domNode = editor.getDomNode();
+    if (domNode) {
+      // Функция обработки перетаскивания
+      domNode.addEventListener('dragover', (e: DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'copy';
+        }
+      });
+      
+      // Обработка сброса файла
+      domNode.addEventListener('drop', (e: DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const file = e.dataTransfer.files[0];
+          // Проверяем, что это текстовый файл
+          if (file.type === 'text/plain' || file.type === 'text/markdown' || 
+              file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.name.endsWith('.txt')) {
+            // Генерируем событие для загрузки файла
+            const event = new CustomEvent('app-file-dropped', { 
+              bubbles: true,
+              detail: { file }
+            });
+            document.dispatchEvent(event);
+          }
+        }
+      });
+    }
+    
+    // Вызываем переданный обработчик, если он есть
     if (onEditorDidMount) {
       onEditorDidMount(editor);
     }

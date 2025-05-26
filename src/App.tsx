@@ -108,22 +108,20 @@ function App() {
   
   // Инициализируем историю при первой загрузке содержимого
   useEffect(() => {
-    if (content && history.length === 0) {
-      setHistory([content]);
-      setHistoryIndex(0);
-    }
-  }, [content]);
-  
-  // Загрузка сохраненного контента при первом рендере
-  useEffect(() => {
+    // Проверяем, есть ли сохраненный контент в localStorage
     const savedContent = localStorage.getItem(STORAGE_KEY);
+    
     if (savedContent) {
       setContent(savedContent);
+      localStorage.setItem(STORAGE_KEY, savedContent);
     } else {
+      // Если нет сохраненного контента, загружаем дефолтный
       setContent(DEFAULT_CONTENT);
       localStorage.setItem(STORAGE_KEY, DEFAULT_CONTENT);
     }
   }, []);
+  
+
   
   // Сохранение контента при изменении
   useEffect(() => {
@@ -399,6 +397,77 @@ function App() {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(isOpen => !isOpen);
   };
+  
+  // Обработчики для пользовательских событий из Monaco Editor
+  useEffect(() => {
+    // Обработчик сохранения файла (Ctrl+S / Cmd+S)
+    const handleSaveEvent = () => {
+      // Используем текущее значение content
+      console.log('Save event triggered with content length:', content.length);
+      handleSaveAsMd();
+    };
+    
+    // Обработчик открытия файла (Ctrl+O / Cmd+O)
+    const handleOpenEvent = () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.md, .markdown, .txt';
+      fileInput.style.display = 'none';
+      
+      fileInput.addEventListener('change', (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.files && event.target.files.length > 0) {
+          const syntheticEvent = {
+            target: event.target
+          } as React.ChangeEvent<HTMLInputElement>;
+          
+          handleFileUpload(syntheticEvent);
+        }
+      });
+      
+      document.body.appendChild(fileInput);
+      fileInput.click();
+      setTimeout(() => document.body.removeChild(fileInput), 100);
+    };
+    
+    // Обработчик перетаскивания файла на редактор
+    const handleFileDropEvent = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail && event.detail.file) {
+        const file = event.detail.file;
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          if (e.target && typeof e.target.result === 'string') {
+            // Устанавливаем содержимое файла
+            setContent(e.target.result);
+            
+            // Добавляем в историю
+            const fileContent = e.target.result as string;
+            setHistory(prev => [...prev, fileContent]);
+            setHistoryIndex(prevIndex => prevIndex + 1);
+            
+            // Сохраняем в localStorage
+            localStorage.setItem(STORAGE_KEY, e.target.result);
+          }
+        };
+        
+        reader.readAsText(file);
+      }
+    };
+    
+    // Регистрируем обработчики событий
+    document.addEventListener('app-save-file', handleSaveEvent);
+    document.addEventListener('app-open-file', handleOpenEvent);
+    document.addEventListener('app-file-dropped', handleFileDropEvent);
+    
+    // Удаляем обработчики при размонтировании
+    return () => {
+      document.removeEventListener('app-save-file', handleSaveEvent);
+      document.removeEventListener('app-open-file', handleOpenEvent);
+      document.removeEventListener('app-file-dropped', handleFileDropEvent);
+    };
+  }, [content]); // Добавляем зависимость от content
+  
+
 
   return (
     <div className={`app dark-theme ${isMobile ? 'mobile-layout' : ''}`}>
