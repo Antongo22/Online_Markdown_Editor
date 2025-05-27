@@ -22,6 +22,11 @@ jobs:
         port: 8542
         script: |
           cd ~/Desktop/Online_Markdown_Editor
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Обнаружены локальные изменения, выполняется сброс..."
+            git reset --hard HEAD
+            git clean -fd
+          fi
           git pull
           docker-compose down
           docker-compose up --build -d
