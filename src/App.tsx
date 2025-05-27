@@ -331,10 +331,33 @@ function App() {
         }
       }
       
-      // Если не нашли непустую строку, используем стандартное имя
-      return firstNonEmptyLine ? 
-        `${firstNonEmptyLine.substring(0, 30)}.md` : 
-        'document.md';
+      // Очищаем имя файла от спецсимволов Markdown
+      let cleanFileName = firstNonEmptyLine;
+      if (cleanFileName) {
+        // Удаляем различные Markdown-элементы
+        cleanFileName = cleanFileName
+          // Удаляем заголовки (#, ##, ###)
+          .replace(/^#+\s*/, '')
+          // Удаляем выделения (**bold**, *italic*, ~~strikethrough~~)
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*]+)\*/g, '$1')
+          .replace(/~~([^~]+)~~/g, '$1')
+          .replace(/`([^`]+)`/g, '$1')
+          // Удаляем ссылки [text](url)
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          // Удаляем символы списков (-, *, +)
+          .replace(/^[\-*+]\s+/, '')
+          // Удаляем нумерацию списков (1., 2., и т.д.)
+          .replace(/^\d+\.\s+/, '')
+          // Удаляем оставшиеся недопустимые для имени файла символы
+          .replace(/[\\/:\*?"<>|]/g, '');
+        
+        // Ограничиваем длину имени файла до 70 символов
+        cleanFileName = cleanFileName.substring(0, 70).trim();
+      }
+      
+      // Если не нашли непустую строку или после очистки ничего не осталось, используем стандартное имя
+      return cleanFileName ? `${cleanFileName}.md` : 'document.md';
     };
     
     try {
