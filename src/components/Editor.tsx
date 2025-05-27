@@ -69,22 +69,56 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
       }
     });
     
-    // Добавляем горячие клавиши через API Monaco Editor
-    // Это более надежный способ, чем слушать события на уровне window
+    // Добавляем горячие клавиши - универсальный подход, работающий как в HTTP, так и в HTTPS
     
-    // Регистрируем Ctrl+S/Cmd+S для сохранения
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      // Генерируем пользовательское событие для сохранения
-      const event = new CustomEvent('app-save-file', { bubbles: true });
-      document.dispatchEvent(event);
-    });
+    try {
+      // Пробуем использовать Monaco API для регистрации команд
+      if (typeof monaco !== 'undefined') {
+        // Регистрируем Ctrl+S/Cmd+S для сохранения
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+          console.log('Monaco command: Ctrl+S triggered');
+          // Генерируем пользовательское событие для сохранения
+          const event = new CustomEvent('app-save-file', { bubbles: true });
+          document.dispatchEvent(event);
+        });
+        
+        // Регистрируем Ctrl+O/Cmd+O для открытия
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
+          console.log('Monaco command: Ctrl+O triggered');
+          // Генерируем пользовательское событие для открытия файла
+          const event = new CustomEvent('app-open-file', { bubbles: true });
+          document.dispatchEvent(event);
+        });
+      }
+    } catch (monacoError) {
+      console.warn('Monaco commands registration failed:', monacoError);
+    }
     
-    // Регистрируем Ctrl+O/Cmd+O для открытия
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
-      // Генерируем пользовательское событие для открытия файла
-      const event = new CustomEvent('app-open-file', { bubbles: true });
-      document.dispatchEvent(event);
-    });
+    // Дополнительный резервный метод для перехвата клавиш (работает в HTTP)
+    // Используем тот же DOM узел для обработки клавиш
+    const editorDomNode = editor.getDomNode();
+    if (editorDomNode) {
+      // Добавляем обработчик клавиш на DOM-узел редактора
+      editorDomNode.addEventListener('keydown', (e: KeyboardEvent) => {
+        // Перехватываем Ctrl+S / Cmd+S
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+          console.log('DOM event: Ctrl+S triggered');
+          e.preventDefault();
+          e.stopPropagation();
+          const event = new CustomEvent('app-save-file', { bubbles: true });
+          document.dispatchEvent(event);
+        }
+        
+        // Перехватываем Ctrl+O / Cmd+O
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'o' || e.key === 'O')) {
+          console.log('DOM event: Ctrl+O triggered');
+          e.preventDefault();
+          e.stopPropagation();
+          const event = new CustomEvent('app-open-file', { bubbles: true });
+          document.dispatchEvent(event);
+        }
+      }, true); // Используем фазу перехвата (capture)
+    }
     
     if (mobile && editor) {
       // Добавляем обработчик двойного клика для мобильных устройств
@@ -113,10 +147,10 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
     }
     
     // Добавляем поддержку перетаскивания файлов на редактор
-    const domNode = editor.getDomNode();
-    if (domNode) {
+    // Используем тот же DOM-узел для обработки перетаскивания
+    if (editorDomNode) {
       // Функция обработки перетаскивания
-      domNode.addEventListener('dragover', (e: DragEvent) => {
+      editorDomNode.addEventListener('dragover', (e: DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         if (e.dataTransfer) {
@@ -125,7 +159,7 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
       });
       
       // Обработка сброса файла
-      domNode.addEventListener('drop', (e: DragEvent) => {
+      editorDomNode.addEventListener('drop', (e: DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         
@@ -134,6 +168,7 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
           // Проверяем, что это текстовый файл
           if (file.type === 'text/plain' || file.type === 'text/markdown' || 
               file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.name.endsWith('.txt')) {
+            console.log('File dropped:', file.name);
             // Генерируем событие для загрузки файла
             const event = new CustomEvent('app-file-dropped', { 
               bubbles: true,

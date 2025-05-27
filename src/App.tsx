@@ -316,75 +316,113 @@ function App() {
       return;
     }
     
-    try {
-      // Получаем первую непустую строку без MD разметки для имени файла
-      let defaultFileName = 'document.md';
-      
-      // Получаем все строки документа
+    // Получаем имя файла по умолчанию из первой строки документа
+    const getDefaultFileName = () => {
       const lines = content.split('\n');
+      let firstNonEmptyLine = '';
       
       // Ищем первую непустую строку
-      for (const line of lines) {
-        // Игнорируем пробелы, табуляцию и другие пустые символы
+      for (let line of lines) {
         const trimmedLine = line.trim();
         if (trimmedLine) {
-          // Удаляем маркеры заголовков (# ## ### и т.д.)
-          const cleanTitle = trimmedLine.replace(/^#+\s*/, '');
-          
-          if (cleanTitle) {
-            // Преобразуем в допустимое имя файла, убирая недопустимые символы
-            defaultFileName = cleanTitle.replace(/[\/:*?"<>|]/g, '_').substring(0, 100) + '.md';
-            break; // Нашли первую непустую строку, выходим из цикла
-          }
+          // Удаляем маркеры заголовков и пробелы
+          firstNonEmptyLine = trimmedLine.replace(/^#+\s*/, '');
+          break;
         }
       }
       
-      // Используем File System Access API для открытия диалога сохранения
-      if ('showSaveFilePicker' in window) {
-        // Современные браузеры с поддержкой File System Access API
-        const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: defaultFileName,
+      // Если не нашли непустую строку, используем стандартное имя
+      return firstNonEmptyLine ? 
+        `${firstNonEmptyLine.substring(0, 30)}.md` : 
+        'document.md';
+    };
+    
+    try {
+      // Проверяем, что браузер поддерживает File System Access API и мы в безопасном контексте (HTTPS)
+      const isSecureContext = window.isSecureContext && 'showSaveFilePicker' in window;
+      console.log('Is secure context with File System Access API:', isSecureContext);
+      
+      if (isSecureContext) {
+        // Современный способ с выбором места сохранения
+        const options = {
+          suggestedName: getDefaultFileName(),
           types: [{
-            description: 'Markdown файл',
+            description: 'Markdown файлы',
             accept: { 'text/markdown': ['.md'] }
           }]
-        });
+        };
         
-        // Создаем записываемый поток
-        const writable = await fileHandle.createWritable();
-        await writable.write(content);
-        await writable.close();
+        let fileHandle;
+        try {
+          // @ts-ignore - TypeScript может не распознать этот метод
+          fileHandle = await window.showSaveFilePicker(options);
+          
+          // Создаем поток для записи
+          const writable = await fileHandle.createWritable();
+          
+          // Записываем текст в файл
+          await writable.write(content);
+          
+          // Закрываем поток
+          await writable.close();
+          
+          console.log('File saved successfully using File System Access API');
+        } catch (error) {
+          console.error('Error using File System Access API:', error);
+          // Проверяем, была ли это отмена пользователем
+          const isUserCancelled = (error instanceof Error && 
+                                 error.name === 'AbortError') || 
+                                 !fileHandle;
+          
+          if (!isUserCancelled) {
+            // Если это не отмена, а другая ошибка, используем резервный метод
+            useDownloadFallback();
+          }
+        }
       } else {
-        // Запасной вариант для старых браузеров
-        const blob = new Blob([content], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = defaultFileName;
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        URL.revokeObjectURL(url);
+        // Выполняем резервный метод сохранения
+        console.log('Using download fallback method for HTTP context');
+        useDownloadFallback();
       }
     } catch (error) {
-      console.error('Ошибка при сохранении файла:', error);
-      
-      // Проверяем, не является ли ошибка отменой пользователя
-      const errorMessage = String(error);
-      const isUserCancelled = errorMessage.includes('user aborted') || 
-                            errorMessage.includes('abort') || 
-                            errorMessage.includes('cancel') || 
-                            errorMessage.includes('The user aborted a request');
-      
-      // Показываем алерт только если это не отмена пользователем
-      if (!isUserCancelled) {
-        alert('Произошла ошибка при сохранении файла. Попробуйте еще раз.');
-      }
+      console.error('Unexpected error during save:', error);
+      // При любой ошибке используем резервный метод
+      useDownloadFallback();
     }
     
     setIsMobileMenuOpen(false);
+    
+    // Резервный метод сохранения для HTTP-контекста
+    function useDownloadFallback() {
+      try {
+        // Создаем Blob из текста
+        const blob = new Blob([content], { type: 'text/markdown' });
+        
+        // Создаем URL для Blob
+        const url = URL.createObjectURL(blob);
+        
+        // Создаем элемент <a> для загрузки
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = getDefaultFileName();
+        a.style.display = 'none';
+        
+        // Добавляем в DOM и кликаем
+        document.body.appendChild(a);
+        a.click();
+        
+        // Чистим ресурсы
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+        
+        console.log('File saved successfully using download fallback');
+      } catch (downloadError) {
+        console.error('Error in download fallback:', downloadError);
+        alert('Произошла ошибка при сохранении файла. Попробуйте еще раз.');
+      }
+    }
   };
   
   // Переключение между редактором и предпросмотром на мобильных устройствах
