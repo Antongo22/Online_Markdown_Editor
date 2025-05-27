@@ -445,8 +445,10 @@ function App() {
       handleSaveAsMd();
     };
     
-    // Обработчик открытия файла (Ctrl+O / Cmd+O)
+    // Обработчик открытия файла - устаревший метод (оставлен для обратной совместимости)
     const handleOpenEvent = () => {
+      console.log('Legacy open event triggered');
+      // Просто открываем диалог выбора файла
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = '.md, .markdown, .txt';
@@ -464,13 +466,30 @@ function App() {
       
       document.body.appendChild(fileInput);
       fileInput.click();
-      setTimeout(() => document.body.removeChild(fileInput), 100);
+      setTimeout(() => document.body.removeChild(fileInput), 500);
     };
     
-    // Обработчик перетаскивания файла на редактор
+    // Новый обработчик для выбранного файла (работает с новым событием)
+    const handleOpenFileSelectedEvent = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail && event.detail.inputElement) {
+        console.log('File selected event received');
+        const inputElement = event.detail.inputElement as HTMLInputElement;
+        
+        if (inputElement.files && inputElement.files.length > 0) {
+          const syntheticEvent = {
+            target: inputElement
+          } as React.ChangeEvent<HTMLInputElement>;
+          
+          handleFileUpload(syntheticEvent);
+        }
+      }
+    };
+    
+    // Обработчик перетаскивания файла на редактор (старый метод, в котором сами читаем файл)
     const handleFileDropEvent = (event: Event) => {
       if (event instanceof CustomEvent && event.detail && event.detail.file) {
         const file = event.detail.file;
+        console.log('File drop event received:', file.name);
         const reader = new FileReader();
         
         reader.onload = (e) => {
@@ -492,16 +511,54 @@ function App() {
       }
     };
     
+    // Новый обработчик для уже загруженного содержимого файла
+    const handleFileContentLoadedEvent = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail) {
+        const { fileName, content } = event.detail;
+        console.log('File content loaded event received:', fileName, 'Content length:', content.length);
+        
+        if (typeof content === 'string') {
+          // Устанавливаем содержимое файла
+          setContent(content);
+          
+          // Добавляем в историю
+          setHistory(prev => [...prev, content]);
+          setHistoryIndex(prevIndex => prevIndex + 1);
+          
+          // Сохраняем в localStorage
+          localStorage.setItem(STORAGE_KEY, content);
+        }
+      }
+    };
+    
     // Регистрируем обработчики событий
     document.addEventListener('app-save-file', handleSaveEvent);
-    document.addEventListener('app-open-file', handleOpenEvent);
+    document.addEventListener('app-open-file', handleOpenEvent); // Старый метод
+    document.addEventListener('app-open-file-selected', handleOpenFileSelectedEvent); // Новый метод
     document.addEventListener('app-file-dropped', handleFileDropEvent);
+    document.addEventListener('app-file-content-loaded', handleFileContentLoadedEvent); // Новый метод для перетаскивания
+    
+    // Добавляем глобальный обработчик Ctrl+O для всего документа
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'o' || e.key === 'O')) {
+        console.log('Global Ctrl+O intercepted');
+        e.preventDefault();
+        e.stopPropagation();
+        handleOpenEvent();
+      }
+    };
+    
+    // Добавляем глобальный обработчик с высоким приоритетом
+    document.addEventListener('keydown', handleGlobalKeyDown, { capture: true });
     
     // Удаляем обработчики при размонтировании
     return () => {
       document.removeEventListener('app-save-file', handleSaveEvent);
       document.removeEventListener('app-open-file', handleOpenEvent);
+      document.removeEventListener('app-open-file-selected', handleOpenFileSelectedEvent);
       document.removeEventListener('app-file-dropped', handleFileDropEvent);
+      document.removeEventListener('app-file-content-loaded', handleFileContentLoadedEvent);
+      document.removeEventListener('keydown', handleGlobalKeyDown, { capture: true });
     };
   }, [content]); // Добавляем зависимость от content
   

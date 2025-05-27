@@ -84,10 +84,34 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
         
         // Регистрируем Ctrl+O/Cmd+O для открытия
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
+          // Предотвращаем стандартное действие браузера
+          window.event?.preventDefault();
           console.log('Monaco command: Ctrl+O triggered');
-          // Генерируем пользовательское событие для открытия файла
-          const event = new CustomEvent('app-open-file', { bubbles: true });
-          document.dispatchEvent(event);
+          
+          // Вместо генерации события, напрямую создаем и кликаем по input
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = '.md, .markdown, .txt';
+          fileInput.style.display = 'none';
+          
+          fileInput.addEventListener('change', (event) => {
+            console.log('File selected:', (event.target as HTMLInputElement).files?.[0]?.name);
+            // Генерируем событие только после выбора файла
+            const customEvent = new CustomEvent('app-open-file-selected', { 
+              bubbles: true,
+              detail: { inputElement: event.target }
+            });
+            document.dispatchEvent(customEvent);
+          });
+          
+          // Добавляем элемент в DOM и кликаем по нему
+          document.body.appendChild(fileInput);
+          fileInput.click();
+          
+          // Удаляем с задержкой
+          setTimeout(() => {
+            document.body.removeChild(fileInput);
+          }, 500); // Увеличиваем время задержки
         });
       }
     } catch (monacoError) {
@@ -165,11 +189,55 @@ const Editor = ({ content, onChange, onEditorDidMount, mobile = false, onSelectL
         
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           const file = e.dataTransfer.files[0];
-          // Проверяем, что это текстовый файл
-          if (file.type === 'text/plain' || file.type === 'text/markdown' || 
-              file.name.endsWith('.md') || file.name.endsWith('.markdown') || file.name.endsWith('.txt')) {
-            console.log('File dropped:', file.name);
-            // Генерируем событие для загрузки файла
+          console.log('File drop detected:', file.name, 'Type:', file.type);
+          
+          // Проверяем, что это текстовый файл (более широкая проверка)
+          const isTextFile = 
+            file.type === 'text/plain' || 
+            file.type === 'text/markdown' || 
+            file.type === '' || // некоторые файлы могут не иметь типа
+            file.name.toLowerCase().endsWith('.md') || 
+            file.name.toLowerCase().endsWith('.markdown') || 
+            file.name.toLowerCase().endsWith('.txt') || 
+            file.name.toLowerCase().endsWith('.text');
+          
+          if (isTextFile) {
+            console.log('File is valid, reading content directly...');
+            
+            // Вместо генерации события, сразу читаем файл
+            const reader = new FileReader();
+            
+            reader.onload = (loadEvent) => {
+              if (loadEvent.target && typeof loadEvent.target.result === 'string') {
+                console.log('File content loaded, length:', loadEvent.target.result.length);
+                
+                // Генерируем событие с уже загруженным содержимым
+                const event = new CustomEvent('app-file-content-loaded', { 
+                  bubbles: true,
+                  detail: { 
+                    fileName: file.name,
+                    content: loadEvent.target.result 
+                  }
+                });
+                document.dispatchEvent(event);
+              }
+            };
+            
+            reader.onerror = (error) => {
+              console.error('Error reading file:', error);
+              // Фаллбэк - отправляем только файл, пусть App разбирается
+              const event = new CustomEvent('app-file-dropped', { 
+                bubbles: true,
+                detail: { file }
+              });
+              document.dispatchEvent(event);
+            };
+            
+            // Читаем файл как текст
+            reader.readAsText(file);
+          } else {
+            // Если это не текстовый файл, то просто отправляем событие с файлом
+            console.log('File is not a recognized text format');
             const event = new CustomEvent('app-file-dropped', { 
               bubbles: true,
               detail: { file }
